@@ -12,11 +12,12 @@ spec:
       targetPort: 5432
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: resources-db
   namespace: k8s-program
 spec:
+  serviceName: resources-db
   replicas: 1
   selector:
     matchLabels:
@@ -38,3 +39,16 @@ spec:
               value: "postgres"
             - name: POSTGRES_DB
               value: "postgres"
+          volumeMounts:
+            - name: resources-db-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: resources-db-storage
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 256Mi

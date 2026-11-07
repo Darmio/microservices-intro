@@ -12,11 +12,12 @@ spec:
       targetPort: 5432
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: songs-db
   namespace: k8s-program
 spec:
+  serviceName: songs-db
   replicas: 1
   selector:
     matchLabels:
@@ -38,3 +39,16 @@ spec:
               value: "postgres"
             - name: POSTGRES_DB
               value: "postgres"
+          volumeMounts:
+            - name: songs-db-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: songs-db-storage
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 256Mi
